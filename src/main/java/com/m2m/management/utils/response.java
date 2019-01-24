@@ -9,7 +9,7 @@ public class response {
      */
     public static MsgFormer success(Object object){
         MsgFormer msg=new MsgFormer();
-        msg.setMsg("Success");
+        msg.setStatus("success");
         msg.setData(object);
         return msg;
     }
@@ -19,7 +19,8 @@ public class response {
 
     public static MsgFormer error(String resultmsg){
         MsgFormer msg=new MsgFormer();
-        msg.setMsg(resultmsg);
+        msg.setStatus("error");
+        msg.setData(resultmsg);
         return msg;
     }
 }

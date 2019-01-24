@@ -3,18 +3,18 @@ package com.m2m.management.former;
 public class MsgFormer<T> {
 
     /*提示信息 */
-    private String msg;
+    private String status;
 
     /*具体内容*/
     private  T data;
 
 
-    public String getMsg() {
-        return msg;
+    public String getStatus() {
+        return status;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public T getData() {

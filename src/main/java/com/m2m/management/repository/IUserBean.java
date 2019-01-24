@@ -3,9 +3,15 @@ package com.m2m.management.repository;
 import com.m2m.management.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface IUserBean extends JpaRepository<User, Long> {
-    User findUserByname(String username);
-    @Query("select u from User u where u.uid=?1")
-    User findByUid(Long Uid);
+    //分页模糊查询
+    List<User> findByNameContaining(String keyword, Pageable pageable);
+    List<User> findByNameContaining(String keyword);
+    //name 查询
+    User findByName(String name);
 }

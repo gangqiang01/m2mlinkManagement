@@ -121,7 +121,7 @@ public class ClientDevice implements java.io.Serializable {
     public void setRegistrationEndpointAddress(InetSocketAddress address) {
         this.registrationEndpointAddress = address;
     }
-
+    @Column(name = "lifetimeinsecbigint")
     public long getLifeTimeInSec() {
         return this.lifeTimeInSec;
     }
@@ -142,7 +142,7 @@ public class ClientDevice implements java.io.Serializable {
     public void setLwM2mVersion(String lwM2mVersion){
         this.lwM2mVersion = lwM2mVersion;
     }
-
+    @Column(name = "bindingmode")
     public int getBindingMode(){ return this.bindingMode; }
     public void setBindingMode(int bindingMode) { this.bindingMode =  bindingMode; }
 
