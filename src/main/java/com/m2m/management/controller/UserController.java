@@ -52,9 +52,12 @@ public class UserController {
         logger.info("Fetching User with id " + id);
         try{
             Optional<User> opuser  = userService.findById(id);
-            return new ResponseEntity(response.success(opuser.get()), HttpStatus.OK);
-        }catch(NoSuchElementException e){
-            return new ResponseEntity(response.error("uid is error"), HttpStatus.NOT_FOUND);
+            try{
+                User user = opuser.get();
+                return new ResponseEntity(response.success(user), HttpStatus.OK);
+            }catch(NoSuchElementException e){
+                return new ResponseEntity(response.error("uid is error"), HttpStatus.NOT_FOUND);
+            }
         }catch(Exception e){
             return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -71,7 +74,8 @@ public class UserController {
                 return new ResponseEntity(response.error("username alread exit"), HttpStatus.CONFLICT);
             }
         }catch(NullPointerException e){
-
+            logger.error(e.getMessage());
+            return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         user.setPasswd(DigestUtils.md5DigestAsHex(user.getPasswd().getBytes()));
         user.setTs(new Date().getTime());
@@ -103,7 +107,6 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
         logger.info("Fetching & Deleting User with id " + id);
         try{
-            Optional<User> user = userService.findById(id);
             userService.deleteById(id);
             return new ResponseEntity(response.success(), HttpStatus.OK);
         }catch(NullPointerException e){

@@ -2,26 +2,26 @@ package com.m2m.management.entity;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.persistence.Column;
-import javax.persistence.OneToMany;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
+
 @Entity
 @Table(name = "user", schema = "public")
 public class User implements java.io.Serializable {
-
+	@Id
+	@SequenceGenerator(name = "user_uid_seq", allocationSize = 1, initialValue = 1, sequenceName = "user_uid_seq")
+	@GeneratedValue(generator = "user_uid_seq", strategy = GenerationType.SEQUENCE)
+	@Column(unique = true, nullable = false)
 	private long uid;
+
+	@Column(unique = true, length = 256)
 	private String name;
+
 	private String passwd;
+
 	private Long ts;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private Set<Repo> repo = new HashSet<Repo>(0);
 
 	private User() {
 	}
@@ -35,10 +35,7 @@ public class User implements java.io.Serializable {
 		this.passwd = passwd;
 	}
 
-	@Id
-	@SequenceGenerator(name = "user_uid_seq", allocationSize = 1, initialValue = 1, sequenceName = "user_uid_seq")  
-	@GeneratedValue(generator = "user_uid_seq", strategy = GenerationType.SEQUENCE)
-	@Column(name = "uid", unique = true, nullable = false)
+
 	public long getUid() {
 		return this.uid;
 	}
@@ -47,7 +44,7 @@ public class User implements java.io.Serializable {
 		this.uid = uid;
 	}
 
-	@Column(name = "name", unique = true, length = 256)
+
 	public String getName() {
 		return this.name;
 	}
@@ -56,7 +53,7 @@ public class User implements java.io.Serializable {
 		this.name = name;
 	}
 
-	@Column(name = "passwd", length = 256)
+
 	public String getPasswd() {
 		return this.passwd;
 	}
@@ -65,7 +62,7 @@ public class User implements java.io.Serializable {
 		this.passwd = passwd;
 	}
 
-	@Column(name = "ts")
+
 	public Long getTs() {
 		return this.ts;
 	}
@@ -73,5 +70,14 @@ public class User implements java.io.Serializable {
 	public void setTs(Long ts) {
 		this.ts = ts;
 	}
+
+
+	public Set<Repo> getRepo() {
+		return this.repo;
+	}
+	public void setRepo(Set<Repo> repo) {
+		this.repo = repo;
+	}
+
 
 }

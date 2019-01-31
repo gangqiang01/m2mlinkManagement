@@ -60,7 +60,7 @@ public class DeviceGroup implements java.io.Serializable {
 		this.name = name;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
     @JoinColumn(name = "uid")
     public User getUser() {
         return this.user;
@@ -70,7 +70,7 @@ public class DeviceGroup implements java.io.Serializable {
         this.user = user;
     }
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "deviceGroup")
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "deviceGroup")
     public Set<Device> getDevices() {
         return this.devices;
     }
