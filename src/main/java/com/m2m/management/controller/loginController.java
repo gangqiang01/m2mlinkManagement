@@ -3,7 +3,7 @@ package com.m2m.management.controller;
 
 import com.m2m.management.entity.User;
 import com.m2m.management.repository.IUserBean;
-import com.m2m.management.utils.response;
+import com.m2m.management.utils.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.constraints.Null;
 
 
 @RestController
@@ -35,12 +33,12 @@ public class loginController {
         try{
             User u = userService.findByName(username);
             if(u.getPasswd().equals(md5pwd)){
-                return new ResponseEntity(response.success(), HttpStatus.OK);
+                return new ResponseEntity(Response.success(), HttpStatus.OK);
             }else{
-                return new ResponseEntity(response.error("password is error"), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity(Response.error("password is error"), HttpStatus.BAD_REQUEST);
             }
         }catch(Exception e){
-            return new ResponseEntity(response.error("username or passwd is error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("username or passwd is error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

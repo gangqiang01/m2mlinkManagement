@@ -1,7 +1,7 @@
 package com.m2m.management.utils;
 
 import com.m2m.management.former.MsgFormer;
-public class response {
+public class Response {
     /**
      * 请求成功返回
      * @param object

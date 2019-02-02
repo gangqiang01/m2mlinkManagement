@@ -1,10 +1,12 @@
 package com.m2m.management.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.m2m.management.entity.Repo;
 import com.m2m.management.entity.User;
 import com.m2m.management.repository.IRepoBean;
 import com.m2m.management.repository.IUserBean;
-import com.m2m.management.utils.response;
+import com.m2m.management.restful.RepoManager;
+import com.m2m.management.utils.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,16 +34,16 @@ public class RepoController {
 
     @RequestMapping(value = "/repo", method = RequestMethod.GET)
     public ResponseEntity<List<Repo>> getRepo(
-            @RequestParam(name="keywords") String keywords,
-            @RequestParam(name="currentpage") int currentpage,
-            @RequestParam(name="limit") int limit) {
+            @RequestParam(name="keywords", required = false, defaultValue ="") String keywords,
+            @RequestParam(name="currentpage", required = false, defaultValue ="0") int currentpage,
+            @RequestParam(name="limit", required = false, defaultValue ="10") int limit) {
         logger.info(keywords);
         Pageable pageable = new PageRequest(currentpage, limit, Sort.Direction.DESC,"rid");
         List<Repo> repos = repoService.findByReponameContaining(keywords, pageable);
         if (repos.isEmpty()) {
             return new ResponseEntity<List<Repo>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
         }
-        return new ResponseEntity(response.success(repos), HttpStatus.OK);
+        return new ResponseEntity(Response.success(repos), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/repo/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,12 +51,12 @@ public class RepoController {
         try{
             Optional<Repo> oprepo = repoService.findById(id);
             Repo repo = oprepo.get();
-            return new ResponseEntity(response.success(repo), HttpStatus.OK);
+            return new ResponseEntity(Response.success(repo), HttpStatus.OK);
         }catch(NoSuchElementException e){
-            return new ResponseEntity(response.error("rid is error"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(Response.error("rid is error"), HttpStatus.NOT_FOUND);
         }catch(Exception e){
             logger.error(e.getMessage());
-            return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -63,22 +65,31 @@ public class RepoController {
         try{
             User u = null;
             long uid = repo.getUid();
+            String reponame = repo.getReponame();
             Optional<User> opu = userService.findById(uid);
             u = opu.get();
             repo.setUser(u);
-            repo.setDarkname(DigestUtils.md5DigestAsHex(repo.getReponame().getBytes()));
-            repoService.save(repo);
-            return new ResponseEntity(response.success(), HttpStatus.OK);
+            String darkname = DigestUtils.md5DigestAsHex(repo.getReponame().getBytes());
+            repo.setDarkname(darkname);
+            RepoManager repoManager = new RepoManager();
+            ResponseEntity<String> response = repoManager.addUser(darkname);
+            if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
+                repoService.save(repo);
+                return new ResponseEntity(Response.success(), HttpStatus.OK);
+            }else{
+                return new ResponseEntity(Response.error("create repo error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
         }catch(NoSuchElementException e){
-            return new ResponseEntity(response.error("uid is error"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(Response.error("uid is error"), HttpStatus.NOT_FOUND);
         }catch(Exception e){
             logger.error(e.getMessage());
-            return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
 
     }
-    @RequestMapping(value = "/repo/{id}", method = RequestMethod.POST)
+    @RequestMapping(value = "/repo/{rid}", method = RequestMethod.POST)
     public ResponseEntity<Void> updateRepo(@PathVariable("rid") long rid, @RequestBody Repo repo){
         try{
             Optional<Repo> oprp = repoService.findById(rid);
@@ -87,24 +98,34 @@ public class RepoController {
             rp.setDescription(repo.getDescription());
             rp.setReponame(repo.getReponame());
             repoService.save(rp);
-            return new ResponseEntity(response.success(), HttpStatus.OK);
+            return new ResponseEntity(Response.success(), HttpStatus.OK);
         }catch(NoSuchElementException e){
-            return new ResponseEntity(response.error("rid is error"), HttpStatus.NOT_FOUND);
+            return new ResponseEntity(Response.error("rid is error"), HttpStatus.NOT_FOUND);
         }catch(Exception e){
             logger.error(e.getMessage());
-            return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @RequestMapping(value = "/repo/{rid}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteRepoById(@PathVariable("rid") long rid){
          try{
-             repoService.deleteByRid(rid);
-             return new ResponseEntity(response.success(), HttpStatus.OK);
+             Repo repo = repoService.findById(rid).get();
+             String darkname = repo.getDarkname();
+             logger.info(darkname);
+             RepoManager repoManager = new RepoManager();
+             ResponseEntity<String> response = repoManager.deleteUser(darkname);
+             if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
+                 repoService.deleteById(rid);
+                 return new ResponseEntity(Response.success(), HttpStatus.OK);
+             }else{
+                 return new ResponseEntity(Response.error("delete repo error"), HttpStatus.NOT_FOUND);
+             }
+
          }catch(NullPointerException e){
-             return new ResponseEntity(response.error("rid not found"), HttpStatus.NOT_FOUND);
+             return new ResponseEntity(Response.error("rid not found"), HttpStatus.NOT_FOUND);
          }catch(Exception e){
              logger.error(e.getMessage());
-             return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+             return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
          }
 
     }
@@ -113,10 +134,10 @@ public class RepoController {
     public ResponseEntity<Void> deleteRepoAll(){
         try{
             repoService.deleteAll();
-            return new ResponseEntity(response.success(), HttpStatus.OK);
+            return new ResponseEntity(Response.success(), HttpStatus.OK);
         }catch(Exception e){
             logger.error(e.getMessage());
-            return new ResponseEntity(response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

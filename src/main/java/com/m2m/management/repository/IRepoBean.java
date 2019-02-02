@@ -9,8 +9,7 @@ import java.util.List;
 public interface IRepoBean extends JpaRepository<Repo, Long> {
     List<Repo> findByReponameContaining(String keyword, Pageable pageable);
     List<Repo> findByReponameContaining(String keyword);
-    void deleteByRid(long rid);
 
     //name 查询
-    Repo findByReponame(String name);
+    List<Repo> findByReponame(String name);
 }

@@ -13,10 +13,10 @@ public class Repo implements java.io.Serializable{
     @Column(name = "rid", unique = true, nullable = false)
     private long rid;
 
-    @Column(name="reponame", length = 32)
+    @Column(nullable = false, unique = true)
     private String reponame;
 
-    @Column(name="darkname", length = 32)
+    @Column(nullable = false)
     private String darkname;
 
     @Column(name="description", length = 32)

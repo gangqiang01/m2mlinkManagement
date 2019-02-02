@@ -20,7 +20,7 @@ public class User implements java.io.Serializable {
 
 	private Long ts;
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	@OneToMany
 	private Set<Repo> repo = new HashSet<Repo>(0);
 
 	private User() {

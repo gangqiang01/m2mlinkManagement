@@ -11,7 +11,7 @@ public class RepoApps implements java.io.Serializable {
     @Column(unique = true, nullable = false)
     private long rfid;
 
-    @Column(nullable = false)
+    @Column(nullable = false,  unique = true)
     private String filename;
 
     @Column(nullable = false)
@@ -43,11 +43,9 @@ public class RepoApps implements java.io.Serializable {
     private RepoApps(long rfid){
         this.rfid = rfid;
     }
-    public RepoApps(String filename, String pkgname, String versioncode, String versionname){
+    public RepoApps(String filename, String pkgname){
         this.filename = filename;
         this.pkgname = pkgname;
-        this.versioncode = versioncode;
-        this.versionname = versionname;
     }
 
 
@@ -78,6 +76,13 @@ public class RepoApps implements java.io.Serializable {
     }
     public void setVersionname(String versionname){
         this.versionname = versionname;
+    }
+
+    public String getVersioncode(){
+        return this.versioncode;
+    }
+    public void setVersioncode(String versioncode){
+        this.versioncode = versioncode;
     }
 
 
