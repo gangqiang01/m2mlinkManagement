@@ -40,9 +40,6 @@ public class RepoController {
         logger.info(keywords);
         Pageable pageable = new PageRequest(currentpage, limit, Sort.Direction.DESC,"rid");
         List<Repo> repos = repoService.findByReponameContaining(keywords, pageable);
-        if (repos.isEmpty()) {
-            return new ResponseEntity<List<Repo>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
-        }
         return new ResponseEntity(Response.success(repos), HttpStatus.OK);
     }
 
@@ -114,11 +111,12 @@ public class RepoController {
              logger.info(darkname);
              RepoManager repoManager = new RepoManager();
              ResponseEntity<String> response = repoManager.deleteUser(darkname);
+             repoService.deleteById(rid);
              if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
-                 repoService.deleteById(rid);
+
                  return new ResponseEntity(Response.success(), HttpStatus.OK);
              }else{
-                 return new ResponseEntity(Response.error("delete repo error"), HttpStatus.NOT_FOUND);
+                 return new ResponseEntity(Response.error("delete ftp repo error"), HttpStatus.NOT_FOUND);
              }
 
          }catch(NullPointerException e){

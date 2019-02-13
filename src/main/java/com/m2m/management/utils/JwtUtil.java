@@ -28,7 +28,7 @@ public class JwtUtil {
         return builder.compact();
     }
 
-    public static String getSubject(HttpServletRequest req, String jwtTokenCookieName){
+    public static String getSubject(String jwtTokenCookieName){
         SecretKey key = generalKey();
         return Jwts.parser().setSigningKey(key).parseClaimsJws(jwtTokenCookieName).getBody().getSubject();
     }

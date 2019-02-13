@@ -1,5 +1,9 @@
 package com.m2m.management.entity;
 
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonBackReference;
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonIgnore;
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,11 +26,12 @@ public class Repo implements java.io.Serializable{
     @Column(name="description", length = 32)
     private String description;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "uid")
     private User user;
 
-    @OneToMany
+    @OneToMany(mappedBy = "repo", cascade={CascadeType.REMOVE})
     private Set<RepoApps> repoApps = new HashSet<RepoApps>(0);
 
     @Transient
@@ -88,9 +93,10 @@ public class Repo implements java.io.Serializable{
     public void setUser(User user){
         this.user = user;
     }
-    public Set<RepoApps> getRepoApps() {
-        return this.repoApps;
-    }
+
+//    public Set<RepoApps> getRepoApps() {
+//        return this.repoApps;
+//    }
     public void setRepoApps(Set<RepoApps> repoApps) {
         this.repoApps = repoApps;
     }

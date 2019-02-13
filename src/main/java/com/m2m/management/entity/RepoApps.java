@@ -11,7 +11,7 @@ public class RepoApps implements java.io.Serializable {
     @Column(unique = true, nullable = false)
     private long rfid;
 
-    @Column(nullable = false,  unique = true)
+    @Column(nullable = false)
     private String filename;
 
     @Column(nullable = false)

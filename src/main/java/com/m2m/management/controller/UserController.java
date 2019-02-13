@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -40,9 +39,6 @@ public class UserController {
         logger.info(keywords);
         Pageable pageable = new PageRequest(currentpage, limit, Sort.Direction.ASC, "ts");
         List<User> users = userService.findByNameContaining(keywords, pageable);
-        if(users.isEmpty()){
-            return new ResponseEntity<List<User>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
-        }
         return new ResponseEntity(Response.success(users), HttpStatus.OK);
     }
 
@@ -67,22 +63,14 @@ public class UserController {
         logger.info("Creating User " + user.getName());
         User u = null;
         try{
-            u = userService.findByName(user.getName());
-            if (userService.existsById(u.getUid())) {
-                logger.info("A User with name " + user.getName() + " already exist");
-                return new ResponseEntity(Response.error("username alread exit"), HttpStatus.CONFLICT);
-            }
-        }catch(NullPointerException e){
+            user.setPasswd(DigestUtils.md5DigestAsHex(user.getPasswd().getBytes()));
+            user.setTs(new Date().getTime());
+            userService.save(user);
+            return new ResponseEntity(Response.success(), HttpStatus.OK);
+        }catch(Exception e){
             logger.error(e.getMessage());
-            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(Response.error("username already exists"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        user.setPasswd(DigestUtils.md5DigestAsHex(user.getPasswd().getBytes()));
-        user.setTs(new Date().getTime());
-        userService.save(user);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(ucBuilder.path("/user/{id}").buildAndExpand(user.getUid()).toUri());
-        return new ResponseEntity(Response.success(), headers, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/user/{id}", method = RequestMethod.PUT)

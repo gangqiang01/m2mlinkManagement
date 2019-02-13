@@ -1,5 +1,9 @@
 package com.m2m.management.entity;
 
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonIgnore;
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
@@ -20,7 +24,7 @@ public class User implements java.io.Serializable {
 
 	private Long ts;
 
-	@OneToMany
+	@OneToMany(mappedBy = "user", cascade={CascadeType.REMOVE})
 	private Set<Repo> repo = new HashSet<Repo>(0);
 
 	private User() {
@@ -72,9 +76,9 @@ public class User implements java.io.Serializable {
 	}
 
 
-	public Set<Repo> getRepo() {
-		return this.repo;
-	}
+//	public Set<Repo> getRepo() {
+//		return this.repo;
+//	}
 	public void setRepo(Set<Repo> repo) {
 		this.repo = repo;
 	}

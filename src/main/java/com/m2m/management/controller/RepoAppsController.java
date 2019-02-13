@@ -48,9 +48,6 @@ public class RepoAppsController {
         logger.info("repoapp:"+keywords);
         Pageable pageable = new PageRequest(currentpage, limit, Sort.Direction.DESC, "rfid");
         List<RepoApps> repoApps = repoAppsService.findByFilenameContaining(keywords, pageable);
-        if (repoApps.isEmpty()) {
-            return new ResponseEntity<List<RepoApps>>(HttpStatus.NO_CONTENT);//You many decide to return HttpStatus.NOT_FOUND
-        }
         return new ResponseEntity(Response.success(repoApps), HttpStatus.OK);
     }
 
@@ -151,11 +148,11 @@ public class RepoAppsController {
             String filename = repoApps.getFilename();
             RepoManager repoManager = new RepoManager();
             ResponseEntity<String> response = repoManager.deleteFileByReponame(darkname, filename);
+            repoAppsService.deleteById(rfid);
             if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
-                repoAppsService.deleteById(rfid);
                 return new ResponseEntity(Response.success(), HttpStatus.OK);
             }else{
-                return new ResponseEntity(Response.error("delete repo error"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity(Response.error("delete ftp app error"), HttpStatus.NOT_FOUND);
             }
         }catch(NullPointerException e){
             return new ResponseEntity(Response.error("user not found"), HttpStatus.NOT_FOUND);
