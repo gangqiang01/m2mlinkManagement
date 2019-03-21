@@ -1,11 +1,14 @@
 package com.m2m.management.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.m2m.management.Resource.DeployResource;
+import com.m2m.management.Resource.RepoResource;
 import com.m2m.management.entity.Repo;
 import com.m2m.management.entity.User;
 import com.m2m.management.repository.IRepoBean;
 import com.m2m.management.repository.IUserBean;
 import com.m2m.management.restful.RepoManager;
+import com.m2m.management.utils.FileUtil;
 import com.m2m.management.utils.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -26,6 +31,10 @@ import java.util.Optional;
 @RestController
 public class RepoController {
     private static final Logger logger = LoggerFactory.getLogger(RepoController.class);
+    private String baseRepoPath = DeployResource.BASEDEPLOYPATH+ RepoResource.TYPE;
+    private String pathSeparate = File.separator;
+
+
     @Autowired
     private IRepoBean repoService;
 
@@ -60,17 +69,21 @@ public class RepoController {
     @RequestMapping(value = "/repo", method = RequestMethod.POST)
     public ResponseEntity<Void> createRepo(@RequestBody Repo repo){
         try{
-            User u = null;
-            long uid = repo.getUid();
-            String reponame = repo.getReponame();
-            Optional<User> opu = userService.findById(uid);
-            u = opu.get();
-            repo.setUser(u);
+            Boolean isCreatApkRepo = false;
             String darkname = DigestUtils.md5DigestAsHex(repo.getReponame().getBytes());
-            repo.setDarkname(darkname);
-            RepoManager repoManager = new RepoManager();
-            ResponseEntity<String> response = repoManager.addUser(darkname);
-            if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
+            File baseDeplyFile = new File(DeployResource.BASEDEPLOYPATH);
+            logger.info("baseRepoPath:"+baseRepoPath+"/baseIsExist:"+baseDeplyFile.exists());
+            if(baseDeplyFile.exists()){
+                isCreatApkRepo = FileUtil.createDir(baseRepoPath + pathSeparate + darkname);
+            }else{
+                isCreatApkRepo = false;
+            }
+            if(isCreatApkRepo){
+                long uid = repo.getUid();
+                Optional<User> opu = userService.findById(uid);
+                User u = opu.get();
+                repo.setUser(u);
+                repo.setDarkname(darkname);
                 repoService.save(repo);
                 return new ResponseEntity(Response.success(), HttpStatus.OK);
             }else{
@@ -106,17 +119,24 @@ public class RepoController {
     @RequestMapping(value = "/repo/{rid}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteRepoById(@PathVariable("rid") long rid){
          try{
+             Boolean isDelete = false;
              Repo repo = repoService.findById(rid).get();
              String darkname = repo.getDarkname();
              logger.info(darkname);
-             RepoManager repoManager = new RepoManager();
-             ResponseEntity<String> response = repoManager.deleteUser(darkname);
-             repoService.deleteById(rid);
-             if(JSONObject.parseObject(response.getBody()).getString("status").equals("success")){
-
+             File baseRepoFile = new File(baseRepoPath);
+             if(baseRepoFile.exists()){
+                 File apkRepoFile = new File(baseRepoFile + File.separator + darkname);
+                 if(apkRepoFile.exists()){
+                      isDelete = FileUtil.delDir(baseRepoPath + File.separator + darkname);
+                 }else{
+                     isDelete = false;
+                 }
+             }
+             if(isDelete){
+                 repoService.deleteById(rid);
                  return new ResponseEntity(Response.success(), HttpStatus.OK);
              }else{
-                 return new ResponseEntity(Response.error("delete ftp repo error"), HttpStatus.NOT_FOUND);
+                 return new ResponseEntity(Response.error("delete app repo error"), HttpStatus.NOT_FOUND);
              }
 
          }catch(NullPointerException e){

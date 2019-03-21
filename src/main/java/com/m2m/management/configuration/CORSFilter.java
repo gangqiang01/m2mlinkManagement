@@ -14,7 +14,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 //@Component
-
 @WebFilter(filterName = "CORSFilter", urlPatterns = {"/repo/*","/user/*","/repoapps/*"})
 public class CORSFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(CORSFilter.class);
@@ -44,7 +43,6 @@ public class CORSFilter implements Filter {
             String username = JwtUtil.getSubject(token);
             String uname = (String)session.getAttribute("username");
             if(username == null || !username.equals(uname)){
-
                 return false;
             }
         }catch(Exception e){
