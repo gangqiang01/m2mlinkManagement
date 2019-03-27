@@ -2,14 +2,16 @@ package com.m2m.management.entity;
 
 import javax.persistence.*;
 
+import java.io.Serializable;
+
 @Entity
-@Table(name="repofiles",schema = "public")
-public class RepoApps implements java.io.Serializable {
+@Table(name="reppapps",schema = "public")
+public class RepoApp implements Serializable {
     @Id
-    @SequenceGenerator(name = "repofiles_rfid_seq", allocationSize = 1, initialValue = 1, sequenceName = "repofiles_rfid_seq")
-    @GeneratedValue(generator = "repofiles_rfid_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "repoapps_raid_seq", allocationSize = 1, initialValue = 1, sequenceName = "repoapps_raid_seq")
+    @GeneratedValue(generator = "repoapps_raid_seq", strategy = GenerationType.SEQUENCE)
     @Column(unique = true, nullable = false)
-    private long rfid;
+    private long raid;
 
     @Column(nullable = false)
     private String filename;
@@ -18,10 +20,10 @@ public class RepoApps implements java.io.Serializable {
     private String pkgname;
 
     @Column(nullable = false)
+    private String versionname;
+
     private String versioncode;
 
-    @Column(nullable = false)
-    private String versionname;
 
     private long dlcount;
 
@@ -39,21 +41,21 @@ public class RepoApps implements java.io.Serializable {
     @JoinColumn(name = "rid")
     private Repo repo;
 
-    private RepoApps(){};
-    private RepoApps(long rfid){
-        this.rfid = rfid;
+    private RepoApp(){};
+    private RepoApp(long raid){
+        this.raid = raid;
     }
-    public RepoApps(String filename, String pkgname){
+    public RepoApp(String filename, String pkgname){
         this.filename = filename;
         this.pkgname = pkgname;
     }
 
 
-    public long getrfid(){
-        return this.rfid;
+    public long getraid(){
+        return this.raid;
     }
-    private void setrfid(long rfid){
-        this.rfid = rfid;
+    private void setraid(long raid){
+        this.raid = raid;
     }
 
     public String getFilename(){

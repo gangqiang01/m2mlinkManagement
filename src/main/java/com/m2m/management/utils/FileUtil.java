@@ -4,34 +4,54 @@ import com.m2m.management.controller.RepoController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class FileUtil {
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
     public static Boolean copyFile(File ofile,String newPath) throws IOException{
         logger.info("newcopypath:"+newPath);
-        FileInputStream in=new FileInputStream(ofile);
-        File file=new File(newPath);
-        if(file.exists()){
-           return false;
+        FileInputStream in = null;
+        FileOutputStream out = null;
+        try {
+
+            in = new FileInputStream(ofile);
+            File file = new File(newPath);
+            if (file.exists()) {
+                return false;
+            }
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            file.createNewFile();
+            out = new FileOutputStream(file);
+            FileChannel fcin = in.getChannel();
+            FileChannel fcout = out.getChannel();
+            fcin.transferTo(0, fcin.size(), fcout);
+            in.close();
+            out.close();
+            return true;
+        }catch(IOException e){
+            e.printStackTrace();
+            return false;
+        }finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
-        if(!file.getParentFile().exists()){
-            file.getParentFile().mkdirs();
-        }
-        file.createNewFile();
-        FileOutputStream out=new FileOutputStream(file);
-        int c;
-        byte buffer[]=new byte[1024];
-        while((c=in.read(buffer))!=-1){
-            for(int i=0;i<c;i++)
-                out.write(buffer[i]);
-        }
-        in.close();
-        out.close();
-        return true;
     }
 
     public static Boolean createDir(String path){

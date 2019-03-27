@@ -29,6 +29,7 @@ public class GetApkInfo {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
         return resMap;
     }

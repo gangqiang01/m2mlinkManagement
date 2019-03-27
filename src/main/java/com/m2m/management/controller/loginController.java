@@ -41,6 +41,7 @@ public class loginController {
             HttpSession session = req.getSession();
             if(u.getPasswd().equals(md5pwd)){
                 session.setAttribute("username", username);
+                logger.info(session.getAttribute("username").toString());
                 String token = JwtUtil.generateToken(username, 1000*60*60);
                 JSONObject result = new JSONObject();
                 result.put("token", token);

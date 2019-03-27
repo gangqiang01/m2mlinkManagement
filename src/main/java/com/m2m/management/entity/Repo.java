@@ -1,9 +1,5 @@
 package com.m2m.management.entity;
 
-import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonBackReference;
-import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonIgnore;
-import com.auth0.jwt.internal.com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,16 +19,20 @@ public class Repo implements java.io.Serializable{
     @Column(nullable = false)
     private String darkname;
 
+    private String repotype;
+
+    private String type;
+
     @Column(name="description", length = 32)
     private String description;
 
-    @JsonBackReference
+//    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "uid")
     private User user;
 
     @OneToMany(mappedBy = "repo", cascade={CascadeType.REMOVE})
-    private Set<RepoApps> repoApps = new HashSet<RepoApps>(0);
+    private Set<RepoApp> repoApps = new HashSet<RepoApp>(0);
 
     @Transient
     private long uid;
@@ -72,6 +72,13 @@ public class Repo implements java.io.Serializable{
     }
 
 
+    public String getType(){
+        return this.type;
+    }
+    public void setType(String type){
+        this.type = type;
+    }
+
     public String getDarkname(){
         return this.darkname;
     }
@@ -79,6 +86,13 @@ public class Repo implements java.io.Serializable{
         this.darkname = darkname;
     }
 
+
+    public String getRepoType(){
+        return this.repotype;
+    }
+    public void setRepoType(String repotype){
+        this.repotype = repotype;
+    }
 
     public String getDescription(){
         return this.description;
@@ -97,7 +111,7 @@ public class Repo implements java.io.Serializable{
 //    public Set<RepoApps> getRepoApps() {
 //        return this.repoApps;
 //    }
-    public void setRepoApps(Set<RepoApps> repoApps) {
+    public void setRepoApps(Set<RepoApp> repoApps) {
         this.repoApps = repoApps;
     }
 

@@ -1,13 +1,11 @@
 package com.m2m.management.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.m2m.management.Resource.DeployResource;
 import com.m2m.management.Resource.RepoResource;
 import com.m2m.management.entity.Repo;
 import com.m2m.management.entity.User;
 import com.m2m.management.repository.IRepoBean;
 import com.m2m.management.repository.IUserBean;
-import com.m2m.management.restful.RepoManager;
 import com.m2m.management.utils.FileUtil;
 import com.m2m.management.utils.Response;
 import org.slf4j.Logger;
@@ -66,6 +64,20 @@ public class RepoController {
         }
     }
 
+    @RequestMapping(value = "/repo/{reponame}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Repo> getRepoByName(@PathVariable("reponame") String reponame){
+        try{
+            List<Repo> repos = repoService.findByReponame(reponame);
+            Repo repo = repos.get(0);
+            return new ResponseEntity(Response.success(repo), HttpStatus.OK);
+        }catch(NoSuchElementException e){
+            return new ResponseEntity(Response.error("rid is error"), HttpStatus.NOT_FOUND);
+        }catch(Exception e){
+            logger.error(e.getMessage());
+            return new ResponseEntity(Response.error("server error"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping(value = "/repo", method = RequestMethod.POST)
     public ResponseEntity<Void> createRepo(@RequestBody Repo repo){
         try{
@@ -104,9 +116,8 @@ public class RepoController {
         try{
             Optional<Repo> oprp = repoService.findById(rid);
             Repo rp = oprp.get();
-            rp.setDarkname(repo.getDarkname());
             rp.setDescription(repo.getDescription());
-            rp.setReponame(repo.getReponame());
+            rp.setRepoType(repo.getRepoType());
             repoService.save(rp);
             return new ResponseEntity(Response.success(), HttpStatus.OK);
         }catch(NoSuchElementException e){
@@ -119,6 +130,7 @@ public class RepoController {
     @RequestMapping(value = "/repo/{rid}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deleteRepoById(@PathVariable("rid") long rid){
          try{
+             repoService.deleteById(rid);
              Boolean isDelete = false;
              Repo repo = repoService.findById(rid).get();
              String darkname = repo.getDarkname();
@@ -133,10 +145,9 @@ public class RepoController {
                  }
              }
              if(isDelete){
-                 repoService.deleteById(rid);
                  return new ResponseEntity(Response.success(), HttpStatus.OK);
              }else{
-                 return new ResponseEntity(Response.error("delete app repo error"), HttpStatus.NOT_FOUND);
+                 return new ResponseEntity(Response.error("delete repo dir error"), HttpStatus.NOT_FOUND);
              }
 
          }catch(NullPointerException e){
