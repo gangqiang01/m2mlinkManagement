@@ -54,9 +54,16 @@ public class RepoBspsController {
         List<RepoBsp> repoBsps = repoBspsService.findByBoardnameContaining(keywords, pageable);
         return new ResponseEntity(Response.success(repoBsps), HttpStatus.OK);
     }
+    @RequestMapping(value = "/repobsps/boardname/{boardname}", method = RequestMethod.GET)
+    public ResponseEntity<List<RepoApp>> getRepoBsps(
+            @PathVariable("boardname") String boardname
+            ) {
+        List<RepoBsp> repoBsps = repoBspsService.findByBoardname(boardname);
+        return new ResponseEntity(Response.success(repoBsps), HttpStatus.OK);
+    }
 
     @RequestMapping(value = "/repobsps/{rbid}", method = RequestMethod.GET)
-    public ResponseEntity<RepoApp> getRepoAppsById(@PathVariable("rbid") long rbid){
+    public ResponseEntity<RepoApp> getRepoBspsById(@PathVariable("rbid") long rbid){
         try{
             File file = new File("/D");
             Optional<RepoBsp> opRepoBsps = repoBspsService.findById(rbid);
@@ -87,7 +94,7 @@ public class RepoBspsController {
     }
 
     @RequestMapping(value = "/addBspFile", method = RequestMethod.POST)
-    public ResponseEntity<Void> createRepoApps(
+    public ResponseEntity<Void> createRepoBsps(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "rid") long rid,
             @RequestParam(value = "description") String description,
@@ -107,10 +114,13 @@ public class RepoBspsController {
             String filename = file.getOriginalFilename();
             Optional<Repo> oprepo = repoService.findById(rid);
             Repo repo = oprepo.get();
-            String bspSavePath = baseRepoPath + pathSeparate+repo.getDarkname() + pathSeparate + boardname + pathSeparate + versionname + pathSeparate + filename;
+            String bspRelativePath = repo.getDarkname() + pathSeparate + boardname + pathSeparate + versionname + pathSeparate + filename;
+            String bspSavePath = baseRepoPath + pathSeparate + bspRelativePath;
+            InetAddress address = InetAddress.getLocalHost();
+            String downloadAddress = "http://"+ address.getHostAddress()+ pathSeparate + RepoResource.TYPE + pathSeparate + bspRelativePath;
             File baseDeplyFile = new File(DeployResource.BASEDEPLOYPATH);
             if(baseDeplyFile.exists()){
-                File bspRepoFile = new File(baseRepoPath + pathSeparate + repo.getDarkname());
+                File bspRepoFile = new File(baseRepoPath + pathSeparate +  repo.getDarkname());
                 if(bspRepoFile.exists()){
                     isSave = FileUtil.copyFile(convFile, bspSavePath);
                 }else{
@@ -120,10 +130,9 @@ public class RepoBspsController {
                 return new ResponseEntity(Response.error("server error"), HttpStatus.NOT_FOUND);
             }
             if(isSave){
-                InetAddress address = InetAddress.getLocalHost();
                 RepoBsp repoBsp = new RepoBsp(versionname, boardname);
                 repoBsp.setDescription(description);
-                String downloadAddress = "http://"+ address.getHostAddress()+ bspSavePath;
+
                 repoBsp.setAddress(downloadAddress);
                 repoBsp.setRepo(repo);
                 repoBspsService.save(repoBsp);

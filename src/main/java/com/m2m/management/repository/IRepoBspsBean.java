@@ -11,5 +11,5 @@ public interface IRepoBspsBean extends JpaRepository<RepoBsp, Long> {
     List<RepoBsp> findByBoardnameContaining(String keyword, Pageable pageable);
     List<RepoBsp> findByBoardnameContaining(String keyword);
     //name 查询
-    Repo findByBoardname(String name);
+    List<RepoBsp> findByBoardname(String name);
 }

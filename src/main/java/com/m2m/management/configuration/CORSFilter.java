@@ -29,7 +29,12 @@ public class CORSFilter implements Filter {
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
         response.setHeader("Access-Control-Max-Age", "3600");
         response.setHeader("Access-Control-Allow-Headers", "x-requested-with, Content-Type, accesstoken,timeout");
-        if( request.getRequestURI().equals("/login") || isValid(request, token) || request.getMethod().equals("OPTIONS")){
+        logger.info(request.getRequestURI());
+        if( request.getRequestURI().equals("/login")||
+                request.getRequestURI().startsWith("/static")||
+                request.getRequestURI().equals("/") ||
+                isValid(request, token) ||
+                request.getMethod().equals("OPTIONS")){
             chain.doFilter(req, res);
         }else{
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
